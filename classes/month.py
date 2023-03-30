@@ -41,23 +41,51 @@ class Month:
   def determineMax(self):
     max = 0
     for day in self.days:
-      if day.unit != self.dataUnits & self.dataUnits == "in":
-        day.convertToInches()
-      else:
-        day.convertToCentimeters()
-      
+      self.normalizeDayUnits(day)
       if day.swe > max:
         max = day.swe
     self.max = max
 
-  def determineMix(self):
-    pass
+  def determineMin(self):
+    firstDay = self.days[0]
+    self.normalizeDayUnits(firstDay)
+    min = firstDay.value
+
+    for day in self.days:
+      self.normalizeDayUnits(day)
+      if day.swe < min:
+        min = day.swe
+    self.min = min
 
   def determineAverage(self):
-    pass
+    total = 0
+    for day in self.days:
+      self.normalizeDayUnits(day)
+      total += day.swe
+    self.average = total / len(self.days)
 
   def convertToInches(self):
-    pass
+    if self.dataUnits != "in":
+      inchPerCm = 1/2.54
+      for day in self.days:
+        day.convertToInches()
+      self.max *= inchPerCm
+      self.min *= inchPerCm
+      self.average *= inchPerCm
+      self.dataUnits = "in"
 
   def convertToCentimeters(self):
-    pass
+    if self.dataUnits != "cm":
+      cmPerInch = 2.54
+      for day in self.days:
+        day.convertToCentimeters()
+      self.max *= cmPerInch
+      self.min *= cmPerInch
+      self.average *= cmPerInch
+      self.dataUnits = "cm"
+
+  def normalizeDayUnits(self, day):
+    if self.dataUnits == "in":
+      day.convertToInches()
+    else:
+      day.convertToCentimeters()
